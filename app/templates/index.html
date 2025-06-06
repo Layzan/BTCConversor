@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BTCConversor - Conversor de Bitcoin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f4f7f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input[type="number"], select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background: #2980b9;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1c5980;
+    }
+    #result {
+      margin-top: 25px;
+      padding: 15px;
+      background: #eaf4fb;
+      border-radius: 6px;
+      font-size: 1.2em;
+      color: #2c3e50;
+      text-align: center;
+    }
+    #error {
+      margin-top: 15px;
+      color: #c0392b;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>BTCConversor</h1>
+  <form id="convert-form">
+    <label for="btc">Valor em Bitcoin (BTC):</label>
+    <input type="number" id="btc" name="btc" step="0.0001" min="0" required placeholder="Ex: 0.01" />
+
+    <label for="currency">Converter para:</label>
+    <select id="currency" name="currency" required>
+      <option value="usd">Dólar (USD)</option>
+      <option value="brl">Real (BRL)</option>
+      <option value="eur">Euro (EUR)</option>
+    </select>
+
+    <button type="submit">Converter</button>
+  </form>
+
+  <div id="result" style="display:none;"></div>
+  <div id="error" style="display:none;"></div>
+
+  <script>
+    const form = document.getElementById('convert-form');
+    const resultDiv = document.getElementById('result');
+    const errorDiv = document.getElementById('error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultDiv.style.display = 'none';
+      errorDiv.style.display = 'none';
+
+      const btc = parseFloat(form.btc.value);
+      const currency = form.currency.value;
+
+      if (isNaN(btc) || btc <= 0) {
+        errorDiv.textContent = 'Por favor, insira um valor válido de Bitcoin.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/convert?btc=${btc}&currency=${currency}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Erro desconhecido');
+        }
+        const data = await response.json();
+
+        resultDiv.textContent = `${data.btc} BTC = ${data.converted_value.toLocaleString('pt-BR', { style: 'currency', currency: currency.toUpperCase() })}`;
+        resultDiv.style.display = 'block';
+
+      } catch (err) {
+        errorDiv.textContent = 'Erro ao converter: ' + err.message;
+        errorDiv.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

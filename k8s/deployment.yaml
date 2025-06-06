@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conversor-bitcoin-deployment
+  namespace: applications
+  labels:
+    app: conversor-bitcoin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conversor-bitcoin
+  template:
+    metadata:
+      labels:
+        app: conversor-bitcoin
+    spec:
+      containers:
+      - name: conversor-bitcoin
+        image: conversor-bitcoin:1.0
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
